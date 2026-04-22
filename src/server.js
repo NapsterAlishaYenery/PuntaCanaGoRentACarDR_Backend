@@ -6,6 +6,9 @@ const compression = require('compression');
 require('dotenv').config();
 const path = require('path');
 
+// Import Utils
+const setupAutoPing = require('./utils/auto-ping.util');
+
 // Import global rate limiter middleware
 const globalLimiter = require('./middleware/globalLimiter.middleware');
 
@@ -65,6 +68,11 @@ app.use('/api/google', googleRoutes);
 app.use('/api/addons', addonsRoutes);
 app.use('/api/orders', orderRoutes);
 
+// Simple Routes for keep alive server
+app.get('/keep-alive', (req, res) => {
+  res.status(200).send('Servidor activo');
+});
+
 // Global error handling middleware
 app.use((err, req, res, next) => {
     console.error("Global Server Error:", err.message);
@@ -86,6 +94,9 @@ app.use('/uploads', (req, res, next) => {
 
 // Configure server port
 const port = process.env.PORT || 4000;
+
+// Usigng Utils methode setupAutoPing(); for auto get
+setupAutoPing();
 
 // Start server
 app.listen(port, ()=>{
