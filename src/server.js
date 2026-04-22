@@ -1,4 +1,4 @@
-// Dependencias principales y de seguridad
+// Main dependencies and security
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -6,13 +6,13 @@ const compression = require('compression');
 require('dotenv').config();
 const path = require('path');
 
-// Importar middleware de limitacion global
+// Import global rate limiter middleware
 const globalLimiter = require('./middleware/globalLimiter.middleware');
 
-// Importar la conexion
+// Import database connection
 const conectarMongoDBAltas = require('./config/db');
 
-// Importar las rutas
+// Import routes
 const carsRoutes = require('./routes/car.routes');
 const userRoutes = require('./routes/user.routes');
 const googleRoutes = require('./routes/review-google.routes');
@@ -20,17 +20,17 @@ const addonsRoutes = require('./routes/addon.routes');
 const orderRoutes = require('./routes/order.routes');
 
 
-// Crear el server
+// Create server
 const app = express();
 
-// Configurar el Limiter global
+// Set global limiter
 app.use(globalLimiter);
 
-// Configurar el proxy
+// Configure proxy
 app.set('trust proxy', 1);
 
 
-// Configuarar CORS 
+// Configure CORS
 const allowedOrigins = [
     "http://localhost:4200",
     process.env.FRONTEND_URL,
@@ -39,7 +39,7 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: (origin, callback) => {
-        // Permitir Postman y herramientas sin origin
+        // Allow Postman and tools without origin
         if (!origin || allowedOrigins.includes(origin)) {
             return callback(null, true);
         }
@@ -50,28 +50,28 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Configuara Middlewares globales
+// Configure global middlewares
 app.use(helmet());
 app.use(compression());
 app.use(express.json());
 
-// Conectar a Mongo
+// Connect to MongoDB
 conectarMongoDBAltas();
 
-// Usara las rutas
+// Use routes
 app.use('/api/cars', carsRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/google', googleRoutes);
 app.use('/api/addons', addonsRoutes);
 app.use('/api/orders', orderRoutes);
 
-// Configurar Middleware global de errores
+// Global error handling middleware
 app.use((err, req, res, next) => {
     console.error("Global Server Error:", err.message);
     res.status(500).json({ error: "Internal server error captured in the global error middleware" });
 })
 
-// Configurar CORS para imageneso o archivos estaticos de la app
+// Configure CORS for images or static files
 const corsStaticOptions = {
     origin: allowedOrigins,
     credentials: true
@@ -84,10 +84,10 @@ app.use('/uploads', (req, res, next) => {
     express.static(path.join(__dirname, '../uploads'))
 );
 
-// configurar el puesto del servidor
+// Configure server port
 const port = process.env.PORT || 4000;
 
-// Iniciar el server
+// Start server
 app.listen(port, ()=>{
     console.log(`Server running on port ${port} Punta Cana Rental Car DR Ready`);
 });

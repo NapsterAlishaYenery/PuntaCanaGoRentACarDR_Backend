@@ -10,22 +10,15 @@ const validateAddOns = require('../middleware/validate-addons.middleware');
 // Controlador
 const AddOnController = require('../controllers/addons.controller');
 
-// ==========================================
-// RUTAS PÚBLICAS (Para el Front-end / Checkout)
-// ==========================================
 
-// Obtener todos los add-ons (puedes filtrar por ?active=true en Angular)
+// RUTAS PÚBLICAS (Para el Front-end / Checkout)
 router.get('/all', AddOnController.getAllAddOns);
 
-// Obtener detalle de un add-on específico
 router.get('/detail/:id', validateAddOns.id, AddOnController.getAddOnById);
 
 
-// ==========================================
 // RUTAS PRIVADAS (Solo Admin + Auth + Rate Limiter)
-// ==========================================
 
-// Crear un nuevo Add-on
 router.post(
     '/create', 
     authMiddleware, 
@@ -35,7 +28,6 @@ router.post(
     AddOnController.createAddOn
 );
 
-// Actualizar un Add-on existente
 router.patch(
     '/update/:id', 
     authMiddleware, 
@@ -46,7 +38,6 @@ router.patch(
     AddOnController.updateAddOn
 );
 
-// Eliminar un Add-on
 router.delete(
     '/delete/:id', 
     authMiddleware, 

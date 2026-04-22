@@ -35,13 +35,12 @@ const CustomerSchema = new Schema({
         type: String,
         trim: true,
         default: '',
-        // Optional: Driver's license number
     },
     flightNumber: {
         type: String,
         trim: true,
         default: '',
-        uppercase: true // Standardize flight numbers (e.g., AA123)
+        uppercase: true 
     },
     country: {
         type: String,
@@ -51,7 +50,7 @@ const CustomerSchema = new Schema({
     state: {
         type: String,
         trim: true,
-        default: '' // Can be used for province or state
+        default: '' 
     },
     address: {
         type: String,
@@ -59,7 +58,7 @@ const CustomerSchema = new Schema({
         default: ''
     }
 }, { 
-    _id: false // We don't need a separate ID for the customer object within the order
+    _id: false
 });
 
 module.exports = CustomerSchema;

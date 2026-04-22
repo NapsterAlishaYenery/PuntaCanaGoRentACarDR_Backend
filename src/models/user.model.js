@@ -16,10 +16,10 @@ const UserSchema = new Schema({
         trim: true,
         match: [emailRegex, 'Por favor, proporciona un email válido']
     },
-    password: { // Lo llamamos password para simplicidad en el login
+    password: { 
         type: String,
         required: [true, 'La contraseña es obligatoria'],
-        select: false // No se incluye en los GET por defecto
+        select: false 
     },
     phone: {
         type: String,

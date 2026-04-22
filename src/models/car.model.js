@@ -8,7 +8,7 @@ const CarSchema = new Schema({
         type: String,
         required: [true, 'La marca del vehículo es obligatoria'],
         trim: true,
-        uppercase: true // Para que KIA siempre sea KIA
+        uppercase: true 
     },
     model: {
         type: String,
@@ -57,11 +57,11 @@ const CarSchema = new Schema({
             message: '{VALUE} no es un combustible válido'
         }
     },
-    usDayPrice: { // Cambié us-day por usDayPrice porque los guiones en keys dan problemas en JS
+    usDayPrice: { 
         type: Number,
         required: [true, 'El precio por día en USD es obligatorio'],
         min: [1, 'El precio debe ser mayor a 0'],
-        validate: priceValidator // <--- Aquí se integra tu validador
+        validate: priceValidator 
     },
     description: {
         type: String,
@@ -99,7 +99,7 @@ const CarSchema = new Schema({
         type: Number,
         min: [1, 'El deposito debe ser mayor a 0'],
         default: 100,
-        validate: priceValidator // <--- Aquí se integra tu validador
+        validate: priceValidator 
 
     },
     slug: {
@@ -115,23 +115,19 @@ const CarSchema = new Schema({
 });
 
 CarSchema.pre('validate', function () {
-  // 1. Lógica del SLUG (Solo si es nuevo y no tiene slug)
     if (this.isNew && this.brand && this.model && !this.slug) {
         const base = `${this.brand} ${this.model}`;
         const baseSlug = slugify(base, { lower: true, strict: true });
 
-        // Fecha actual
         const date = new Date();
         const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-        // Generar 5 caracteres aleatorios (Letras y números)
         const randomStr = Math.random().toString(36).substring(2, 7);
 
-        // Resultado: marca-modelo-fecha-random
+       
         this.slug = `${baseSlug}-${dateString}-${randomStr}`;
     }
 
-    // 2. Lógica de CATEGORY (Convertir a minúsculas)
     if (this.category && Array.isArray(this.category)) {
         this.category = this.category.map(c => c.toLowerCase());
     }

@@ -3,24 +3,22 @@ const { Types } = require("mongoose");
 const validateUsers = {
 
     register: (req, res, next) => {
-        // Adaptado al nuevo modelo: name, email, password, phone
         const { name, email, password, phone } = req.body;
 
         if (!name || !email || !password || !phone) {
             return res.status(400).json({
                 ok: false,
                 type: 'ValidationError',
-                message: 'Faltan campos obligatorios (name, email, password, phone)'
+                message: 'Missing required fields (name, email, password, phone)'
             });
         }
 
-        // Validación básica de formato de email para no llegar a la DB si está mal
         const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         if (!emailRegex.test(email)) {
             return res.status(400).json({
                 ok: false,
                 type: 'ValidationError',
-                message: 'El formato del email no es válido'
+                message: 'Invalid email format'
             });
         }
 
@@ -28,14 +26,13 @@ const validateUsers = {
     },
 
     login: (req, res, next) => {
-        // Ahora usamos email en lugar de username
         const { email, password } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({
                 ok: false,
                 type: 'AuthError',
-                message: "Email y contraseña son requeridos"
+                message: "Email and password are required"
             });
         }
         next();
@@ -45,14 +42,13 @@ const validateUsers = {
         const update = req.body;
         const camposRecibidos = Object.keys(update);
 
-        // Campos que NO se pueden tocar mediante el update común de perfil
         const camposProhibidos = ['email', 'password', 'role', '_id', 'createdAt', 'updatedAt'];
 
         if (camposRecibidos.length === 0) {
             return res.status(400).json({
                 ok: false,
                 type: 'EmptyRequest',
-                message: "No se proporcionaron campos para actualizar"
+                message: "No fields were provided for update"
             });
         }
 
@@ -61,7 +57,7 @@ const validateUsers = {
                 return res.status(400).json({
                     ok: false,
                     type: 'ForbiddenField',
-                    message: `El campo '${campo}' está protegido y no puede ser actualizado por esta vía.`
+                    message: `The field '${campo}' is protected and cannot be updated through this route.`
                 });
             }
         }
@@ -74,7 +70,7 @@ const validateUsers = {
             return res.status(400).json({
                 ok: false,
                 type: 'InvalidID',
-                message: "El formato del ID es inválido"
+                message: "Invalid ID format"
             });
         }
         next();

@@ -19,7 +19,6 @@ const AddOnSchema = new Schema({
         type: Number,
         required: [true, 'El precio es obligatorio'],
         min: [0, 'El precio no puede ser negativo'],
-        // Validación para evitar que guarden precios absurdos por error
         validate: {
             validator: (v) => v <= 500,
             message: 'El precio ({VALUE}) parece demasiado alto para un extra.'
@@ -52,7 +51,6 @@ const AddOnSchema = new Schema({
     timestamps: true
 });
 
-// Middleware: Normalizar el nombre antes de guardar (Ej: "full insurance" -> "Full Insurance")
 AddOnSchema.pre('save', function() {
     if (this.name) {
         this.name = this.name

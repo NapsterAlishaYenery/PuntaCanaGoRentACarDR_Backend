@@ -21,8 +21,7 @@ const validateCars = {
     create: (req, res, next) => {
 
         const data = req.body;
-
-        // Bloqueamos el slug en la creación manual
+        
         if (data.slug) {
             return res.status(400).json({
                 ok: false,
@@ -56,7 +55,6 @@ const validateCars = {
             }
         }
 
-        // Validación específica para Category (Array)
         if (!Array.isArray(data.category)) {
             return res.status(400).json({
                 ok: false,
@@ -65,7 +63,6 @@ const validateCars = {
             });
         }
 
-        // Validación de Features (Objeto) - Solo si se envía
         if (data.features && (typeof data.features !== 'object' || Array.isArray(data.features))) {
             return res.status(400).json({
                 ok: false,
@@ -123,7 +120,7 @@ const validateCars = {
             return res.status(400).json({
                 ok: false,
                 type: 'ValidationError',
-                message: "Invalid ID"
+                message: "Invalid ID format"
             });
         }
 

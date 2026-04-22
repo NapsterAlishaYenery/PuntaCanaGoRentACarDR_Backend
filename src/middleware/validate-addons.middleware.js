@@ -21,7 +21,6 @@ const validateAddOns = {
             "price"
         ];
 
-        // 1. Validar presencia de campos obligatorios
         for (const campo of camposObligatorios) {
             if (data[campo] === undefined || data[campo] === null || data[campo] === "") {
                 return res.status(400).json({
@@ -32,7 +31,6 @@ const validateAddOns = {
             }
         }
 
-        // 2. Validaciones de tipo específicas
         if (typeof data.price !== 'number' || data.price < 0) {
             return res.status(400).json({
                 ok: false,
@@ -66,7 +64,6 @@ const validateAddOns = {
         }
 
         for (const campo of camposRecibidos) {
-            // No permitir modificar campos del sistema
             if (camposProhibidos.includes(campo)) {
                 return res.status(400).json({
                     ok: false,
@@ -75,7 +72,6 @@ const validateAddOns = {
                 });
             }
 
-            // Validar que el campo exista en el esquema permitido
             if (!CAMPOS_PERMITIDOS.includes(campo)) {
                 return res.status(400).json({
                     ok: false,

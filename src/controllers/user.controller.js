@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require('../models/user.model');
 
-// --- REGISTER ---
+// REGISTER
 exports.register = async (req, res) => {
     const { name, email, password, phone, role, active } = req.body;
 
@@ -13,13 +13,12 @@ exports.register = async (req, res) => {
         const newUser = await User.create({
             name,
             email,
-            password: passEncrypt, // Usamos la clave del nuevo modelo
+            password: passEncrypt,
             phone,
             role,
             active
         });
 
-        // Convertimos a objeto para quitar el password de la respuesta
         const userResponse = newUser.toObject();
         delete userResponse.password;
 
@@ -47,16 +46,18 @@ exports.register = async (req, res) => {
             });
         }
 
-        res.status(500).json({ ok: false, type: 'ServerError', message: 'Internal server error' });
+        res.status(500).json({
+            ok: false,
+            type: 'ServerError',
+            message: 'Internal server error'
+        });
     }
 };
 
-// --- LOGIN ---
+// LOGIN
 exports.login = async (req, res) => {
-    const { email, password } = req.body; // Cambiamos username por email (más estándar)
-
+    const { email, password } = req.body;
     try {
-        // Seleccionamos el password explícitamente ya que tiene select: false
         const userLogin = await User.findOne({ email }).select('+password');
 
         if (!userLogin) {
@@ -77,11 +78,12 @@ exports.login = async (req, res) => {
             });
         }
 
-        // Generamos el Token con el Role para tus middlewares
-        const token = jwt.sign(
-            { id: userLogin._id, email: userLogin.email, role: userLogin.role },
-            process.env.JWT_SECRET,
-            { expiresIn: "8h" }
+        const token = jwt.sign({
+            id: userLogin._id,
+            email: userLogin.email,
+            role: userLogin.role
+        },
+            process.env.JWT_SECRET, { expiresIn: "8h" }
         );
 
         const userResponse = userLogin.toObject();
@@ -94,17 +96,20 @@ exports.login = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ ok: false, type: 'ServerError', message: 'Internal server error' });
+        res.status(500).json({
+            ok: false,
+            type: 'ServerError',
+            message: 'Internal server error'
+        });
     }
 };
 
-// --- UPDATE (Perfil propio) ---
+// UPDATE (Perfil propio)
 exports.update = async (req, res) => {
-    const id = req.user.id; // Viene del authMiddleware
+    const id = req.user.id;
     const updates = req.body;
 
     try {
-        // Bloqueamos que el usuario cambie su propio rol o email por esta vía si quieres más seguridad
         delete updates.role;
 
         const updateUser = await User.findByIdAndUpdate(
@@ -114,7 +119,11 @@ exports.update = async (req, res) => {
         ).select("-password");
 
         if (!updateUser) {
-            return res.status(404).json({ ok: false, type: 'NotFound', message: 'User not found' });
+            return res.status(404).json({
+                ok: false,
+                type: 'NotFound',
+                message: 'User not found'
+            });
         }
 
         res.status(200).json({
@@ -124,11 +133,15 @@ exports.update = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ ok: false, type: 'ServerError', message: 'Internal server error' });
+        res.status(500).json({
+            ok: false,
+            type: 'ServerError',
+            message: 'Internal server error'
+        });
     }
 };
 
-// --- GET ALL USERS (Solo Admin) ---
+// GET ALL USERS (Solo Admin)
 exports.getAllUsers = async (req, res) => {
     try {
         const { email, role, name } = req.query;
@@ -157,6 +170,7 @@ exports.getAllUsers = async (req, res) => {
         return res.status(200).json({
             ok: true,
             data: users,
+            message: 'All users in the system',
             pagination: {
                 page,
                 limit,
@@ -168,13 +182,17 @@ exports.getAllUsers = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ ok: false, type: 'ServerError', message: 'Error fetching users' });
+        res.status(500).json({
+            ok: false,
+            type: 'ServerError',
+            message: 'Error fetching users'
+        });
     }
 };
 
 // --- GET USER PROFILE (Perfil propio) ---
 exports.getUserProfile = async (req, res) => {
-    const id = req.user.id; // Viene del authMiddleware
+    const id = req.user.id;
 
     try {
         const userProfile = await User.findById(id).select('-password');
@@ -202,33 +220,52 @@ exports.getUserProfile = async (req, res) => {
     }
 };
 
-// --- DELETE USER (Admin borra a cualquiera) ---
+// DELETE USER (Admin borra a cualquiera) 
 exports.deleteUserByAdmin = async (req, res) => {
     try {
         const { id } = req.params;
         const deletedUser = await User.findByIdAndDelete(id);
 
         if (!deletedUser) {
-            return res.status(404).json({ ok: false, message: 'User not found' });
+            return res.status(404).json({
+                ok: false,
+                data: null,
+                type: 'NotFoundError',
+                message: 'User not found'
+            });
         }
 
-        res.status(200).json({ ok: true, message: 'User deleted by administrator' });
+        res.status(200).json({
+            ok: true,
+            data: null,
+            message: 'User deleted by administrator'
+        });
+
     } catch (error) {
-        res.status(500).json({ ok: false, message: 'Error deleting user' });
+        res.status(500).json({
+            ok: false,
+            data: null,
+            type: 'ServerError',
+            message: 'Error deleting user'
+        });
     }
 };
 
-// --- DELETE SELF (Usuario se borra a sí mismo) ---
+// --- DELETE SELF (Usuario se borra a sí mismo)
 exports.deleteSelf = async (req, res) => {
     try {
-        const id = req.user.id; // Viene del token
+        const id = req.user.id;
         await User.findByIdAndDelete(id);
 
-        res.status(200).json({ 
-            ok: true, 
-            message: 'Your account has been deleted successfully' 
+        res.status(200).json({
+            ok: true,
+            message: 'Your account has been deleted successfully'
         });
     } catch (error) {
-        res.status(500).json({ ok: false, message: 'Error deleting your account' });
+        res.status(500).json({
+            ok: false,
+            type: 'ServerError',
+            message: 'Error deleting your account'
+        });
     }
 };

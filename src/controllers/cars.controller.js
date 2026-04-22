@@ -15,7 +15,7 @@ exports.createCars = async (req, res) => {
         usDayPrice,
         description,
         imageurl,
-        features, // Este es el opcional
+        features, 
         deposit
     } = req.body;
 
@@ -46,18 +46,17 @@ exports.createCars = async (req, res) => {
     } catch (error) {
 
         if (error.name === 'ValidationError') {
-            // TIP: Puedes mapear los errores para decir EXACTAMENTE qué falló
             const messages = Object.values(error.errors).map(val => val.message);
 
             return res.status(400).json({
                 ok: false,
                 type: 'ValidationError',
                 message: messages.length > 0 ? messages[0] : 'Invalid data',
-                errors: messages // Esto ayuda mucho en el desarrollo
+                errors: messages 
             });
         }
 
-        console.error(error); // Siempre loguea el error real para ti en la consola
+        console.error(error); 
         res.status(500).json({
             ok: false,
             type: 'ServerError',
@@ -161,7 +160,7 @@ exports.getCarById = async (req, res) => {
         res.status(200).json({
             ok: true,
             data: car,
-            message: 'Car retrieved successfully.'
+            message: 'Car retrieved successfully by Id.'
         });
 
     } catch (error) {
@@ -178,14 +177,13 @@ exports.getCarBySlug = async (req, res) => {
     const { slug } = req.params;
 
     try {
-        // Usamos findOne porque buscamos por un campo personalizado (slug)
         const car = await Cars.findOne({ slug });
 
         if (!car) {
             return res.status(404).json({
                 ok: false,
                 type: 'NotFoundError',
-                message: 'El vehículo solicitado no existe (Slug inválido).'
+                message: 'The requested vehicle does not exist (invalid slug).'
             });
         }
 
@@ -200,7 +198,7 @@ exports.getCarBySlug = async (req, res) => {
         res.status(500).json({
             ok: false,
             type: 'ServerError',
-            message: 'Ocurrió un error crítico en el servidor.',
+            message: 'A critical server error occurred.'
         });
     }
 };
@@ -208,7 +206,6 @@ exports.getCarBySlug = async (req, res) => {
 exports.getAllCars = async (req, res) => {
 
     try {
-        // 1. EXTRAER LAS VARIABLES DE req.query
         const { brand, category, model } = req.query;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;

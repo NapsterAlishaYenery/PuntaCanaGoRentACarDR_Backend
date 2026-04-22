@@ -10,29 +10,27 @@ const OrderSchema = new Schema({
         unique: true,
         uppercase: true
     },
-    // Referencia y Snapshot del vehículo
+   
     car: {
         carId: { type: Schema.Types.ObjectId, ref: 'cars', required: true },
         brand: String, 
         model: String,
-        basePricePerDay: Number // Guardamos el precio del momento
+        basePricePerDay: Number 
     },
-    
-    // Usamos el mismo schema para ambos
+
     pickup: LocationDateSchema,
     return: LocationDateSchema,
 
     days: { 
         type: Number, 
         required: true,
-        min: [3, 'El alquiler mínimo es de 3 días'] // Tu restricción de 3 días
+        min: [3, 'El alquiler mínimo es de 3 días'] 
     },
 
     customer: CustomerSchema,
     addOns: [OrderAddOnSchema],
     financials: FinancialsSchema,
 
-    // Gestión de Pagos
     paymentStatus: {
         type: String,
         enum: ['pending', 'paid', 'partially_paid', 'refunded'],
@@ -44,10 +42,10 @@ const OrderSchema = new Schema({
         default: 'pay_later'
     },
     
-    // Campo para guardar IDs de transacciones de Stripe/PayPal en el futuro
+    
     paymentDetails: {
         transactionId: { type: String, default: null },
-        gatewayResponse: { type: Object, default: null } // Aquí caerá todo lo de Stripe después
+        gatewayResponse: { type: Object, default: null } 
     },
 
     status: {

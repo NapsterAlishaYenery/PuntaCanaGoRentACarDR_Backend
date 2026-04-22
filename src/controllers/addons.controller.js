@@ -39,7 +39,6 @@ exports.createAddOn = async (req, res) => {
             });
         }
 
-        // Manejo de error por nombre duplicado (unique: true)
         if (error.code === 11000) {
             return res.status(400).json({
                 ok: false,
@@ -159,10 +158,9 @@ exports.getAddOnById = async (req, res) => {
 
 exports.getAllAddOns = async (req, res) => {
     try {
-        // 1. Extraer variables de query con valores por defecto
         const { active, name } = req.query;
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 50; // Límite más alto para extras
+        const limit = parseInt(req.query.limit) || 50; 
 
         let query = {};
 
@@ -176,7 +174,6 @@ exports.getAllAddOns = async (req, res) => {
 
         const skip = (page - 1) * limit;
 
-        // 2. Ejecutar búsqueda y conteo en paralelo
         const [allAddOns, totalItems] = await Promise.all([
             AddOn.find(query)
                 .sort({ name: 1 })

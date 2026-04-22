@@ -7,8 +7,7 @@ const conectarMongoDBAltas =  async()=>{
         console.log('Conectado a MongoDB Atlas Para Punta Cana Rental Car DR');
     } catch (error){
         console.error('Error al conectar a MongoDB:', error.message);
-        process.exit(1); // Forzar cierre si falla
-
+        process.exit(1); 
     }
 }
 
