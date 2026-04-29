@@ -8,6 +8,11 @@ const FinancialsSchema = new Schema({
         min: [0, 'Amount cannot be negative'],
         default: 0
     }, 
+    locationFee: { 
+        type: Number,
+        min: [0, 'Amount cannot be negative'], 
+        default: 0 
+    },
     addOnsTotal: {  
         // Total sum of all selected extras/add-ons
         type: Number, 

@@ -1,6 +1,7 @@
 const Order = require('../models/order.model');
 const Car = require('../models/car.model');
 const AddOn = require('../models/addon.model');
+const LOCATIONS = require('../utils/locations');
 
 const generateOrderNumber = () => {
     const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
@@ -16,7 +17,14 @@ exports.createOrder = async (req, res) => {
             return: dropoff,
             customer,
             addOns: addOnsRequest,
-            paymentMethod } = req.body;
+            paymentMethod
+        } = req.body;
+
+        // --- 1. BUSCAR PRECIOS DE UBICACIONES ---
+        const pickupInfo = LOCATIONS.find(l => l.name === pickup.location) || { price: 0 };
+        const dropoffInfo = LOCATIONS.find(l => l.name === dropoff.location) || { price: 0 };
+        
+        const locationTotalFee = pickupInfo.price + dropoffInfo.price;
 
 
         let rentalSubtotal = 0;
@@ -73,7 +81,7 @@ exports.createOrder = async (req, res) => {
             }
         }
 
-        const subtotalGeneral = Number((rentalSubtotal + addOnsTotal).toFixed(2));
+        const subtotalGeneral = Number((rentalSubtotal + addOnsTotal + locationTotalFee).toFixed(2));
         const taxAmount = Number((subtotalGeneral * taxPercentage).toFixed(2));
         const totalFinal = Number((subtotalGeneral + taxAmount).toFixed(2));
 
@@ -85,12 +93,19 @@ exports.createOrder = async (req, res) => {
                 model: carDb.model,
                 basePricePerDay: carDb.usDayPrice
             },
-            pickup,
-            return: dropoff,
+            pickup: {
+                ...pickup,
+                price: pickupInfo.price
+            },
+            return: {
+                ...dropoff,
+                price: dropoffInfo.price
+            },
             days: diffInDays,
             customer,
             addOns: detailedAddOns,
             financials: {
+                locationFee: locationTotalFee,
                 rentalSubtotal,
                 addOnsTotal,
                 subtotalGeneral,
@@ -120,6 +135,10 @@ exports.createOrder = async (req, res) => {
     }
 };
 
+
+
+
+// VERIFICAR LUEGO
 exports.updateOrder = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
