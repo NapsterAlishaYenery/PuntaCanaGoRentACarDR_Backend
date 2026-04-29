@@ -10,15 +10,15 @@ const generateOrderNumber = () => {
 
 exports.createOrder = async (req, res) => {
     try {
-        const { 
-            car, 
-            pickup, 
-            return: dropoff, 
-            customer, 
-            addOns: addOnsRequest, 
+        const {
+            car,
+            pickup,
+            return: dropoff,
+            customer,
+            addOns: addOnsRequest,
             paymentMethod } = req.body;
 
-       
+
         let rentalSubtotal = 0;
         let addOnsTotal = 0;
         const taxPercentage = 0.18;
@@ -30,22 +30,36 @@ exports.createOrder = async (req, res) => {
 
         const pickupDate = new Date(pickup.date);
         const dropoffDate = new Date(dropoff.date);
-        const diffInDays = Math.ceil((dropoffDate - pickupDate) / (1000 * 60 * 60 * 24));
-        
+
+        const diffInMs = dropoffDate.getTime() - pickupDate.getTime();
+        const diffInHours = diffInMs / (1000 * 60 * 60);
+
+        // REGLA DE NEGOCIO IGUAL AL FRONTEND:
+        let diffInDays = Math.floor(diffInHours / 24);
+        const remainingHours = diffInHours % 24;
+
+        // Si se pasa de la hora de entrega por más de 3 minutos (0.05h), cobramos un día extra
+        if (remainingHours > 0.05) {
+            diffInDays += 1;
+        }
+
+        // En tu controlador, después de calcular diffInDays
+        if (diffInDays < 3) diffInDays = 3; // Blindaje extra
+
         rentalSubtotal = carDb.usDayPrice * diffInDays;
 
         const detailedAddOns = [];
         if (Array.isArray(addOnsRequest)) {
             for (const item of addOnsRequest) {
                 const addOnDb = await AddOn.findById(item.addOnId);
-                
+
                 if (addOnDb && addOnDb.active) {
                     const units = parseInt(item.quantity) || 1;
-                    
-                    const totalItem = addOnDb.isPerDay 
+
+                    const totalItem = addOnDb.isPerDay
                         ? (addOnDb.price * units * diffInDays)
                         : (addOnDb.price * units);
-                    
+
                     addOnsTotal += totalItem;
 
                     detailedAddOns.push({
@@ -98,10 +112,10 @@ exports.createOrder = async (req, res) => {
 
     } catch (error) {
         console.error('ORDER_CREATE_ERROR:', error);
-        res.status(500).json({ 
-            ok: false, 
-            type: 'ServerError', 
-            message: 'An error occurred while processing the reservation' 
+        res.status(500).json({
+            ok: false,
+            type: 'ServerError',
+            message: 'An error occurred while processing the reservation'
         });
     }
 };
@@ -114,9 +128,9 @@ exports.updateOrder = async (req, res) => {
         const updatedOrder = await Order.findByIdAndUpdate(
             id,
             { $set: updateData },
-            { 
-                returnDocument: 'after', 
-                runValidators: true 
+            {
+                returnDocument: 'after',
+                runValidators: true
             }
         );
 
@@ -132,10 +146,10 @@ exports.updateOrder = async (req, res) => {
 
     } catch (error) {
         console.error('ORDER_UPDATE_ERROR:', error);
-        res.status(500).json({ 
-            ok: false, 
+        res.status(500).json({
+            ok: false,
             type: 'ServerError',
-            message: 'Error updating order.' 
+            message: 'Error updating order.'
         });
     }
 };
@@ -144,10 +158,10 @@ exports.deleteOrder = async (req, res) => {
     const { id } = req.params;
 
     try {
-       
+
         const cancelledOrder = await Order.findByIdAndUpdate(
             id,
-            { status: 'cancelled' }, 
+            { status: 'cancelled' },
             { new: true }
         );
 
@@ -179,7 +193,7 @@ exports.getOrderById = async (req, res) => {
     const { id } = req.params;
 
     try {
-  
+
         const order = await Order.findById(id);
 
         if (!order) {
@@ -197,7 +211,7 @@ exports.getOrderById = async (req, res) => {
 
     } catch (error) {
         console.error('ORDER_GET_BY_ID_ERROR:', error);
-        
+
 
         if (error.kind === 'ObjectId') {
             return res.status(400).json({
@@ -216,17 +230,17 @@ exports.getOrderById = async (req, res) => {
 
 exports.getAllOrders = async (req, res) => {
     try {
-        const { 
-            page = 1, 
-            limit = 10, 
-            orderNumber, 
-            status, 
-            paymentStatus, 
-            customerName, 
-            email, 
+        const {
+            page = 1,
+            limit = 10,
+            orderNumber,
+            status,
+            paymentStatus,
+            customerName,
+            email,
             carId,
-            startDate, 
-            endDate   
+            startDate,
+            endDate
         } = req.query;
 
         const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -273,7 +287,7 @@ exports.getAllOrders = async (req, res) => {
 
         const [orders, totalItems] = await Promise.all([
             Order.find(query)
-                .sort({ createdAt: -1 }) 
+                .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(parseInt(limit)),
             Order.countDocuments(query)

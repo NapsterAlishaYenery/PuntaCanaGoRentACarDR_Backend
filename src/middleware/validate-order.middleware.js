@@ -4,6 +4,7 @@ const validateOrder = {
     create: (req, res, next) => {
         const { car, pickup, return: dropoff, customer, addOns } = req.body;
 
+
         if (!car || !car.carId || !Types.ObjectId.isValid(car.carId)) {
             return res.status(400).json({
                 ok: false,
@@ -20,21 +21,25 @@ const validateOrder = {
             });
         }
 
+        // Cambia la lógica de validación de días por esta:
         const pickupDate = new Date(pickup.date);
         const dropoffDate = new Date(dropoff.date);
 
-        const diffInMs = dropoffDate - pickupDate;
-        const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+        // Calculamos la diferencia en milisegundos y luego a horas
+        const diffInMs = dropoffDate.getTime() - pickupDate.getTime();
+        const diffInHours = diffInMs / (1000 * 60 * 60);
 
-        if (diffInDays < 3) {
+        // 3 días son 72 horas. 
+        // Usamos 71.9 para dar un pequeño margen de 6 minutos por retrasos de red
+        if (diffInHours < 71.9) {
             return res.status(400).json({
                 ok: false,
                 type: 'ValidationError',
-                message: "The minimum rental period is 3 days. Please adjust your return date."
+                message: "The minimum rental period is 3 days (72 hours)."
             });
         }
 
-       
+
         if (!customer || !customer.firstName || !customer.lastName || !customer.email || !customer.phone) {
             return res.status(400).json({
                 ok: false,
@@ -58,7 +63,7 @@ const validateOrder = {
         next();
     },
 
-    
+
     update: (req, res, next) => {
         const updates = req.body;
 
@@ -70,7 +75,7 @@ const validateOrder = {
             });
         }
 
-       
+
         const camposPermitidos = [
             "status", "paymentStatus", "paymentMethod",
             "customer.phone", "customer.email", "customer.address",
@@ -79,7 +84,7 @@ const validateOrder = {
 
         const finalUpdate = {};
 
-        
+
         Object.keys(updates).forEach(key => {
             if (key === 'customer' && typeof updates.customer === 'object') {
                 Object.keys(updates.customer).forEach(subKey => {
@@ -105,7 +110,7 @@ const validateOrder = {
         next();
     },
 
-    
+
     id: (req, res, next) => {
         const { id } = req.params;
         if (!Types.ObjectId.isValid(id)) {
