@@ -3,6 +3,10 @@ const Car = require('../models/car.model');
 const AddOn = require('../models/addon.model');
 const LOCATIONS = require('../utils/locations');
 
+const { enviarEmail } = require('../services/email.service');
+const { buildOrderTemplate } = require('../templates/order.template');
+const emailConfig = require('../config/email.config');
+
 const generateOrderNumber = () => {
     const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -23,7 +27,7 @@ exports.createOrder = async (req, res) => {
         // --- 1. BUSCAR PRECIOS DE UBICACIONES ---
         const pickupInfo = LOCATIONS.find(l => l.name === pickup.location) || { price: 0 };
         const dropoffInfo = LOCATIONS.find(l => l.name === dropoff.location) || { price: 0 };
-        
+
         const locationTotalFee = pickupInfo.price + dropoffInfo.price;
 
 
@@ -118,6 +122,31 @@ exports.createOrder = async (req, res) => {
         });
 
         await newOrder.save();
+
+        // --- ENVIAR CORREOS EN PARALELO (sin bloquear) ---
+        setImmediate(async () => {
+            try {
+                // Email para el ADMIN (dueño)
+                const adminHtml = buildOrderTemplate(newOrder, true);
+                await enviarEmail({
+                    to: emailConfig.ownerEmail,
+                    subject: `🔔 NEW RESERVATION: ${newOrder.orderNumber} - ${newOrder.customer.firstName} ${newOrder.customer.lastName}`,
+                    html: adminHtml
+                });
+
+                // Email para el CLIENTE
+                const clientHtml = buildOrderTemplate(newOrder, false);
+                await enviarEmail({
+                    to: newOrder.customer.email,
+                    subject: `✅ Reservation Confirmed: ${newOrder.orderNumber}`,
+                    html: clientHtml
+                });
+
+                console.log(`📧 Emails sent for order ${newOrder.orderNumber}`);
+            } catch (emailError) {
+                console.error(`❌ Error sending emails for order ${newOrder.orderNumber}:`, emailError);
+            }
+        });
 
         res.status(201).json({
             ok: true,
