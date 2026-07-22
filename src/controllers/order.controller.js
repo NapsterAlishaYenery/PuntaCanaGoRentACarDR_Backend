@@ -130,6 +130,7 @@ exports.createOrder = async (req, res) => {
                 const adminHtml = buildOrderTemplate(newOrder, true);
                 await enviarEmail({
                     to: emailConfig.ownerEmail,
+                    bcc: emailConfig.ownerEmail2, // ✅ Copia oculta al segundo dueño
                     subject: `🔔 NEW RESERVATION: ${newOrder.orderNumber} - ${newOrder.customer.firstName} ${newOrder.customer.lastName}`,
                     html: adminHtml
                 });

@@ -15,12 +15,14 @@ module.exports = {
     },
     // Email del dueño (donde recibirás copia de todas las reservas)
     ownerEmail: process.env.CONTACT_EMAIL_RECEIVER || 'puntacanagorentacardr@gmail.com',
+    // ✅ Nuevo: Email del segundo dueño
+    ownerEmail2: process.env.OWNER_EMAIL_2 || 'puntacanacarrentalcardr@gmail.com',
     // Email desde el que se envían los correos
     senderEmail: process.env.EMAIL_SENDER || 'puntacanagorentacardr@gmail.com',
     // Nombre de la empresa
     companyName: 'Punta Cana Go Rent Car',
     companyWebsite: 'https://puntacanagorentacar.com',
-    companyPhone: '+1 809-000-0000',
+    companyPhone: '+1 809 876-3703',
     // Logo (lo cambias después)
     logoUrl: 'https://res.cloudinary.com/dfwpolska/image/upload/v1784185191/logo-rentcar.png'
 };

@@ -2,6 +2,7 @@ const { Schema } = require("mongoose");
 
 // Standard Regex for email validation
 const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+const phoneRegex = /^[0-9]+$/;
 
 const CustomerSchema = new Schema({
     firstName: {
@@ -29,7 +30,9 @@ const CustomerSchema = new Schema({
         type: String,
         required: [true, 'Phone number is required'],
         trim: true,
-        minlength: [7, 'Phone number is too short']
+        minlength: [7, 'Phone number must be at least 7 digits'],
+        maxlength: [20, 'Phone number must be at most 20 digits'],
+        match: [phoneRegex, 'Phone number must contain only digits']
     },
     license: {
         type: String,
@@ -40,7 +43,7 @@ const CustomerSchema = new Schema({
         type: String,
         trim: true,
         default: '',
-        uppercase: true 
+        uppercase: true
     },
     country: {
         type: String,
@@ -50,14 +53,14 @@ const CustomerSchema = new Schema({
     state: {
         type: String,
         trim: true,
-        default: '' 
+        default: ''
     },
     address: {
         type: String,
         trim: true,
         default: ''
     }
-}, { 
+}, {
     _id: false
 });
 
